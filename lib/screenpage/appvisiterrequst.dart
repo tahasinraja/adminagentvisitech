@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:adminvisitorapp/demo.dart';
 import 'package:adminvisitorapp/historypage.dart';
+import 'package:adminvisitorapp/screenpage/FCMService.dart';
 import 'package:adminvisitorapp/screenpage/alertsdashboard.dart';
 
 import 'package:adminvisitorapp/screenpage/logoutclass.dart';
@@ -214,6 +215,13 @@ String? selectedPurpose;
       if (responseData.statusCode == 200) {
         final resData = jsonDecode(responseData.body);
         if (resData["status"] == "success") {
+
+          await FCMService.sendFCM(
+  fcmToken: selectedVisitor!["fcm_token"] ?? "",
+  title: "New Guest Visit Request",
+  body: "Guest ${guestNameController.text} requested a visit",
+);
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("✅ Visit Request Submitted")),
           );
