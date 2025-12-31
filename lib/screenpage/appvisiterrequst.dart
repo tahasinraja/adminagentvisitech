@@ -30,9 +30,6 @@ class AutoIncrement {
 }
 
 class AppVisitRequestPage extends StatefulWidget {
-
- 
-
   final List<Map<String, dynamic>> visitors;
 
   const AppVisitRequestPage({super.key, required this.visitors});
@@ -42,15 +39,26 @@ class AppVisitRequestPage extends StatefulWidget {
 }
 
 class _AppVisitRequestPageState extends State<AppVisitRequestPage> {
+  String? selectedPurpose;
 
-String? selectedPurpose;
-
-   List<dynamic> purposelist = [
-    'Courier',
-   'Meeting',
-    'Personal',
-    'Others'
-
+  List<dynamic> purposelist = [
+    'Family / Relative',
+    'Friend / Guest',
+    'Maid / Housekeeping',
+    'Cleaning Staff',
+    'Cook',
+    'Driver',
+    'Milkman',
+    'Delivery (Courier / Food / Grocery)',
+    'Electrician',
+    'Plumber',
+    'AC / Appliance Service',
+    'Internet / Cable Technician',
+    'Carpenter',
+    'Pest Contro',
+    'Society Maintenance',
+    'Property Agent',
+    'Other',
   ];
   // function userdata
 
@@ -215,12 +223,11 @@ String? selectedPurpose;
       if (responseData.statusCode == 200) {
         final resData = jsonDecode(responseData.body);
         if (resData["status"] == "success") {
-
           await FCMService.sendFCM(
-  fcmToken: selectedVisitor!["fcm_token"] ?? "",
-  title: "New Guest Visit Request",
-  body: "Guest ${guestNameController.text} requested a visit",
-);
+            fcmToken: selectedVisitor!["fcm_token"] ?? "",
+            title: "New Guest Visit Request",
+            body: "Guest ${guestNameController.text} requested a visit",
+          );
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("✅ Visit Request Submitted")),
@@ -287,558 +294,581 @@ String? selectedPurpose;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xffffffff),
-      appBar: AppBar(
-        backgroundColor: Color(0xff1cae81),
-        title: Row(
-          children: [
-            Image.asset('assets/images/logo.png', height: 35),
-            SizedBox(width: 10),
-            Spacer(),
-            Text(
-              'VISITECH ',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Spacer(),
-            IconButton(
-              icon: Icon(Icons.logout, color: Colors.white),
-              onPressed: () => Logout.signout(context),
-            ),
-          ],
-        ),
-      ),
-      //    appBar: PreferredSize(
+    return WillPopScope(
+      onWillPop: () async {
+      bool exitapp= await showDialog(context: context, builder:
+       (context) => AlertDialog( 
+        title: Text('Confirm Exit'),
+        content: Text('Are you sure you want to exit the app?'),
+        actions: [
+          TextButton(onPressed: ()=>Navigator.of(context).pop(true), child: Text('Yes')),
+          TextButton(onPressed: ()=>Navigator.of(context).pop(false), child: Text('No'))
+        ],
 
-      //   preferredSize: Size.fromHeight(110),
-      //   child: AppBar(
-      //     automaticallyImplyLeading: false,
-      //    backgroundColor: Color(0xffa7e9cf),
-      //     shape: RoundedRectangleBorder(
-      //       borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-      //     ),
-      //     flexibleSpace: Container(
-      //           decoration: BoxDecoration(
-      //         gradient: LinearGradient(
-      //           colors: [Color(0xffa7e9cf), Color(0xffa7e9cf)],
-
-      //           begin: Alignment.topLeft,
-      //           end: Alignment.bottomRight,
-      //         ),
-      //         borderRadius: BorderRadius.vertical(
-      //           bottom: Radius.circular(30),
-      //         ),
-      //       ),
-      //       child: Padding(
-      //         padding: EdgeInsets.only(top: 40,),
-      //         child: Row(
-      //           mainAxisAlignment: MainAxisAlignment.spaceAround,
-      //           children: [
-      //             Image.asset(
-      //                  'assets/images/logo.png',
-      //                 // fit: BoxFit.cover,
-      //                  width: 60,
-      //                  height: 60,
-      //                ),
-      //             Padding(
-      //               padding: EdgeInsets.all(6),
-      //               child: Column(
-      //                 mainAxisAlignment: MainAxisAlignment.center,
-      //                 crossAxisAlignment: CrossAxisAlignment.center,
-      //                 children: [
-      //                   Text('Request ', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24)),
-      //                   Text('Security is here', style: TextStyle(color: Colors.white))
-      //                 ],
-      //               ),
-      //             ),
-      //           IconButton(onPressed: ()=>Logout.signout(context),
-      //           icon: Icon(Icons.logout,size: 35,),color: Colors.black,)
-      //           ],
-      //         ),
-      //       ),
-      //     ),
-      //   ),
-      // ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await Fetchuserdata();
-        },
-        child: isLoadingData
-            ? const Center(child: CircularProgressIndicator()) // loading UI
-            : errorMessage != null
-            ? Center(
-                child: Text(
-                  errorMessage!,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
+       ));
+      return exitapp;
+      },
+      child: Scaffold(
+        backgroundColor: Color(0xffffffff),
+        appBar: AppBar(
+          backgroundColor: Color(0xff1cae81),
+          title: Row(
+            children: [
+              Image.asset('assets/images/logo.png', height: 35),
+              SizedBox(width: 10),
+              Spacer(),
+              Text(
+                'VISITECH ',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
-              ) // error UI
-            : Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 🔥 baaki tumhara form code yaha hi rahega
+              ),
+              Spacer(),
+              IconButton(
+                icon: Icon(Icons.logout, color: Colors.white),
+                onPressed: () => Logout.signout(context),
+              ),
+            ],
+          ),
+        ),
+        //    appBar: PreferredSize(
 
-                      // 1️⃣ Search TextField
-                      TextField(
-                        onChanged: (query) {
-                          setState(() {
-                            if (query.isEmpty) {
-                              filteredVisitors = widget.visitors;
-                            } else {
-                              filteredVisitors = widget.visitors.where((
-                                visitor,
-                              ) {
-                                final name = visitor["name"]
-                                    .toString()
-                                    .toLowerCase();
-                                final phone = visitor["phone"]
-                                    .toString()
-                                    .toLowerCase();
-                                return name.contains(query.toLowerCase()) ||
-                                    phone.contains(query.toLowerCase());
-                              }).toList();
-                            }
-                          });
-                        },
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(width: 2, color: Colors.red),
-                          ),
-                          labelText: "Select Host",
-                          iconColor: Color(0xff77bd1f),
-                          fillColor: Colors.black,
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Color(0xff77bd1f),
-                          ),
-                        ),
-                      ),
+        //   preferredSize: Size.fromHeight(110),
+        //   child: AppBar(
+        //     automaticallyImplyLeading: false,
+        //    backgroundColor: Color(0xffa7e9cf),
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+        //     ),
+        //     flexibleSpace: Container(
+        //           decoration: BoxDecoration(
+        //         gradient: LinearGradient(
+        //           colors: [Color(0xffa7e9cf), Color(0xffa7e9cf)],
 
-                      const SizedBox(height: 8),
-                      Text(
-                        'Scroll down to view more suggetions list..',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      // 2️⃣ Suggestion list below search
-                      if (filteredVisitors.isNotEmpty)
-                        Container(
-                          height: 150,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.white,
-                          ),
-                          child: ListView.builder(
-                            itemCount: filteredVisitors.length,
-                            itemBuilder: (context, index) {
-                              final visitor = filteredVisitors[index];
-                              final String status = visitor["status"]
-                                  .toString(); // ✅ check status
+        //           begin: Alignment.topLeft,
+        //           end: Alignment.bottomRight,
+        //         ),
+        //         borderRadius: BorderRadius.vertical(
+        //           bottom: Radius.circular(30),
+        //         ),
+        //       ),
+        //       child: Padding(
+        //         padding: EdgeInsets.only(top: 40,),
+        //         child: Row(
+        //           mainAxisAlignment: MainAxisAlignment.spaceAround,
+        //           children: [
+        //             Image.asset(
+        //                  'assets/images/logo.png',
+        //                 // fit: BoxFit.cover,
+        //                  width: 60,
+        //                  height: 60,
+        //                ),
+        //             Padding(
+        //               padding: EdgeInsets.all(6),
+        //               child: Column(
+        //                 mainAxisAlignment: MainAxisAlignment.center,
+        //                 crossAxisAlignment: CrossAxisAlignment.center,
+        //                 children: [
+        //                   Text('Request ', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24)),
+        //                   Text('Security is here', style: TextStyle(color: Colors.white))
+        //                 ],
+        //               ),
+        //             ),
+        //           IconButton(onPressed: ()=>Logout.signout(context),
+        //           icon: Icon(Icons.logout,size: 35,),color: Colors.black,)
+        //           ],
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            await Fetchuserdata();
+          },
+          child: isLoadingData
+              ? const Center(child: CircularProgressIndicator()) // loading UI
+              : errorMessage != null
+              ? Center(
+                  child: Text(
+                    errorMessage!,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ) // error UI
+              : Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 🔥 baaki tumhara form code yaha hi rahega
 
-                              //define icon colore
-                              IconData icon;
-                              Color iconcolore;
-
-                              if (status == '0') {
-                                icon = Icons.block;
-                                iconcolore = Colors.red;
-                              } else if (status == '2') {
-                                icon = Icons.event_busy;
-                                iconcolore = Colors.yellow;
+                        // 1️⃣ Search TextField
+                        TextField(
+                          onChanged: (query) {
+                            setState(() {
+                              if (query.isEmpty) {
+                                filteredVisitors = widget.visitors;
                               } else {
-                                icon = Icons.circle;
-                                iconcolore = Colors.green;
+                                filteredVisitors = widget.visitors.where((
+                                  visitor,
+                                ) {
+                                  final name = visitor["name"]
+                                      .toString()
+                                      .toLowerCase();
+                                  final phone = visitor["phone"]
+                                      .toString()
+                                      .toLowerCase();
+                                  return name.contains(query.toLowerCase()) ||
+                                      phone.contains(query.toLowerCase());
+                                }).toList();
                               }
-
-                              return ListTile(
-                                enabled: status == '1', // <-- disable tile
-
-                                leading: Icon(
-                                  icon,
-                                  size: 18,
-                                  color: iconcolore,
-                                ),
-                                title: Text(
-                                  'Name: ${visitor["name"]?.toString() ?? "Unknown"}',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-
-                                // subtitle: Text('Phone: ${visitor["phone"]?.toString() ?? "N/A"}'),
-                                onTap: status == '1'
-                                    ? // 🚫 1 can selected othe cannot select
-                                      () {
-                                        setState(() {
-                                          selectedVisitor = visitor;
-                                          filteredVisitors = widget.visitors;
-                                        });
-                                      }
-                                    : null,
-                              );
-                            },
-                          ),
-                        )
-                      else
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            "Not Found",
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
+                            });
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                width: 2,
+                                color: Colors.red,
+                              ),
+                            ),
+                            labelText: "Select Host",
+                            iconColor: Color(0xff77bd1f),
+                            fillColor: Colors.black,
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: Color(0xff77bd1f),
                             ),
                           ),
                         ),
 
-                      const SizedBox(height: 12),
-
-                      // 3️⃣ Original Dropdown (unchanged)
-                      //DropdownButtonFormField<Map<String, dynamic>>(
-                      //  value: selectedVisitor != null && widget.visitors.contains(selectedVisitor)
-                      //   ? selectedVisitor
-                      //      : null,
-                      //  isExpanded: true,
-                      //  decoration: InputDecoration(
-                      //    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-                      //    labelText: "Or select Host",
-                      //    labelStyle: const TextStyle(color: Colors.deepPurple),
-                      //  filled: true,
-                      //  fillColor: Colors.deepPurple.shade50,
-                      //  ),
-                      //  items: widget.visitors.map((visitor) {
-                      //  return DropdownMenuItem(
-                      //   value: visitor,
-                      //   child: Text(visitor["name"]?.toString() ?? "Unknown"),
-                      //  );
-                      //  }).toList(),
-                      //  onChanged: (value) {
-                      // setState(() {
-                      // selectedVisitor = value;
-                      // });
-                      //},
-                      //),
-                      const SizedBox(height: 20),
-
-                      if (selectedVisitor != null)
-                        Card(
-                          color: selectedVisitor!["status"].toString() == "0"
-                              ? Colors.grey.shade200
-                              : Colors.white,
-                          elevation: 6,
-                          shadowColor: Colors.deepPurple.shade100,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 40,
-                                  backgroundImage:
-                                      selectedVisitor!["image"] != null &&
-                                          selectedVisitor!["image"]
-                                              .toString()
-                                              .isNotEmpty
-                                      ? NetworkImage(
-                                          selectedVisitor!["image"].toString(),
-                                        )
-                                      : null,
-                                  child:
-                                      (selectedVisitor!["image"] == null ||
-                                          selectedVisitor!["image"]
-                                              .toString()
-                                              .isEmpty)
-                                      ? const Icon(Icons.person, size: 40)
-                                      : null,
-                                ),
-                                const SizedBox(width: 15),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        selectedVisitor!["name"],
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      //  Text(" ${selectedVisitor!["fcm_token"] ?? 'N/A'}"),
-                                      Text(
-                                        "🏠 ${selectedVisitor!["flat"] ?? ''}, Room: ${selectedVisitor!["room"] ?? ''}",
-                                      ),
-
-                                      if (selectedVisitor!["status"]
-                                              .toString() ==
-                                          "0")
-                                        const Text(
-                                          "❌ Inactive",
-                                          style: TextStyle(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Scroll down to view more suggetions list..',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-
-                      const SizedBox(height: 10),
-                      const Text(
-                        "📝 Visitor's Details",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      buildTextField(
-                        " ✍️ Name*",
-                        guestNameController,
-                        required: true,
-                      ),
-
-                      //                Text(
-                      //   selectedVisitor?["fcm_token"] ?? "N/A",
-                      //   style: TextStyle(
-                      //     fontSize: 14,
-                      //     color: Colors.grey[800],
-                      //   ),
-                      // ),
-                      buildTextField(
-                        " 📱 Mobile*",
-                        guestMobileController,
-                        required: true,
-                        type: TextInputType.phone,
-                        maxlenght: 10,
-                      ),
-                      buildTextField(
-                        " 📧Email",
-                        guestEmailController,
-                        type: TextInputType.emailAddress,
-                      ),
-                      buildTextField(
-                        " 🏠Address*",
-                        guestAddressController,
-                        required: true,
-                      ),
-                      DropdownButtonFormField<String>(
-  decoration: InputDecoration(
-    labelText: "📝 Purpose*",
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-    ),
-  ),
-  value: selectedPurpose,
-  items: purposelist.map((purpose) {
-    return DropdownMenuItem<String>(
-      value: purpose,
-      child: Text(purpose),
-    );
-  }).toList(),
-  onChanged: (value) {
-    setState(() {
-      selectedPurpose = value;
-      guestPurposeController.text = value!; // submit ke liye
-    });
-  },
-  validator: (value) {
-    if (value == null || value.isEmpty) {
-      return "Please select purpose";
-    }
-    return null;
-  },
-),
-
-
-                      // buildTextField(
-                      //   " 📝Purpose*",
-                      //   guestPurposeController,
-                      //   required: true,
-                      // ),
-
-                      buildTextField(" 🚗Vehicle No.", guestVichleController),
-
-                      buildTextField(" 🏷️Other", otherController),
-
-                      buildTextField(" 💬Comment", commentController),
-
-                      const SizedBox(height: 20),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
+                        // 2️⃣ Suggestion list below search
+                        if (filteredVisitors.isNotEmpty)
                           Container(
+                            height: 150,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xff1cae81), // Red
-                                  Color(0xff1cae81), // Green
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.white,
                             ),
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors
-                                    .transparent, // Keep transparent for gradient
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              onPressed: () => pickImage(true),
-                              icon: Icon(
-                                visitorPhoto != null
-                                    ? Icons.check_circle
-                                    : Icons.photo_camera,
-                                color: Colors.white,
-                              ),
-                              label: const Text(
-                                "Visitor Photo",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
+                            child: ListView.builder(
+                              itemCount: filteredVisitors.length,
+                              itemBuilder: (context, index) {
+                                final visitor = filteredVisitors[index];
+                                final String status = visitor["status"]
+                                    .toString(); // ✅ check status
 
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xff1cae81), // Red
-                                  Color(0xff1cae81), // Green
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors
-                                    .transparent, // for gradient visibility
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              onPressed: () => pickImage(false),
-                              icon: Icon(
-                                idProofPhoto != null
-                                    ? Icons.check_circle
-                                    : Icons.badge,
-                                color: Colors.white,
-                              ),
-                              label: const Text(
-                                "ID Proof",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                                //define icon colore
+                                IconData icon;
+                                Color iconcolore;
 
-                      const SizedBox(height: 30),
-                      isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : SizedBox(
-                              width: double.infinity,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xff1cae81), // Red
-                                      Color(0xff1cae81), // Green
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
+                                if (status == '0') {
+                                  icon = Icons.block;
+                                  iconcolore = Colors.red;
+                                } else if (status == '2') {
+                                  icon = Icons.event_busy;
+                                  iconcolore = Colors.yellow;
+                                } else {
+                                  icon = Icons.circle;
+                                  iconcolore = Colors.green;
+                                }
+
+                                return ListTile(
+                                  enabled: status == '1', // <-- disable tile
+
+                                  leading: Icon(
+                                    icon,
+                                    size: 18,
+                                    color: iconcolore,
                                   ),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.all(18),
-                                    backgroundColor: Colors
-                                        .transparent, // transparent for gradient
-                                    shadowColor: Colors.transparent,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                  onPressed: submitForm,
-                                  child: const Text(
-                                    "🚀 Submit Request",
+                                  title: Text(
+                                    'Name: ${visitor["name"]?.toString() ?? "Unknown"}',
                                     style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
+
+                                  // subtitle: Text('Phone: ${visitor["phone"]?.toString() ?? "N/A"}'),
+                                  onTap: status == '1'
+                                      ? // 🚫 1 can selected othe cannot select
+                                        () {
+                                          setState(() {
+                                            selectedVisitor = visitor;
+                                            filteredVisitors = widget.visitors;
+                                          });
+                                        }
+                                      : null,
+                                );
+                              },
+                            ),
+                          )
+                        else
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              "Not Found",
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+
+                        const SizedBox(height: 12),
+
+                        // 3️⃣ Original Dropdown (unchanged)
+                        //DropdownButtonFormField<Map<String, dynamic>>(
+                        //  value: selectedVisitor != null && widget.visitors.contains(selectedVisitor)
+                        //   ? selectedVisitor
+                        //      : null,
+                        //  isExpanded: true,
+                        //  decoration: InputDecoration(
+                        //    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                        //    labelText: "Or select Host",
+                        //    labelStyle: const TextStyle(color: Colors.deepPurple),
+                        //  filled: true,
+                        //  fillColor: Colors.deepPurple.shade50,
+                        //  ),
+                        //  items: widget.visitors.map((visitor) {
+                        //  return DropdownMenuItem(
+                        //   value: visitor,
+                        //   child: Text(visitor["name"]?.toString() ?? "Unknown"),
+                        //  );
+                        //  }).toList(),
+                        //  onChanged: (value) {
+                        // setState(() {
+                        // selectedVisitor = value;
+                        // });
+                        //},
+                        //),
+                        const SizedBox(height: 20),
+
+                        if (selectedVisitor != null)
+                          Card(
+                            color: selectedVisitor!["status"].toString() == "0"
+                                ? Colors.grey.shade200
+                                : Colors.white,
+                            elevation: 6,
+                            shadowColor: Colors.deepPurple.shade100,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 40,
+                                    backgroundImage:
+                                        selectedVisitor!["image"] != null &&
+                                            selectedVisitor!["image"]
+                                                .toString()
+                                                .isNotEmpty
+                                        ? NetworkImage(
+                                            selectedVisitor!["image"]
+                                                .toString(),
+                                          )
+                                        : null,
+                                    child:
+                                        (selectedVisitor!["image"] == null ||
+                                            selectedVisitor!["image"]
+                                                .toString()
+                                                .isEmpty)
+                                        ? const Icon(Icons.person, size: 40)
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 15),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          selectedVisitor!["name"],
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        //  Text(" ${selectedVisitor!["fcm_token"] ?? 'N/A'}"),
+                                        Text(
+                                          "🏠 ${selectedVisitor!["flat"] ?? ''}, Room: ${selectedVisitor!["room"] ?? ''}",
+                                        ),
+                                        
+
+                                        if (selectedVisitor!["status"]
+                                                .toString() ==
+                                            "0")
+                                          const Text(
+                                            "❌ Inactive",
+                                            style: TextStyle(
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                        const SizedBox(height: 10),
+                        const Text(
+                          "📝 Visitor's Details",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        buildTextField(
+                          " ✍️ Name*",
+                          guestNameController,
+                          required: true,
+                        ),
+
+                        //                Text(
+                        //   selectedVisitor?["fcm_token"] ?? "N/A",
+                        //   style: TextStyle(
+                        //     fontSize: 14,
+                        //     color: Colors.grey[800],
+                        //   ),
+                        // ),
+                        buildTextField(
+                          " 📱 Mobile*",
+                          guestMobileController,
+                          required: true,
+                          type: TextInputType.phone,
+                          maxlenght: 10,
+                        ),
+                        buildTextField(
+                          " 📧Email",
+                          guestEmailController,
+                          type: TextInputType.emailAddress,
+                        ),
+                        buildTextField(
+                          " 🏠Address*",
+                          guestAddressController,
+                          required: true,
+                        ),
+                        SizedBox(height: 8,),
+                        DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: "📝 Purpose*",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          initialValue: selectedPurpose,
+                          items: purposelist.map((purpose) {
+                            return DropdownMenuItem<String>(
+                              value: purpose,
+                              child: Text(purpose),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedPurpose = value;
+                              guestPurposeController.text =
+                                  value!; // submit ke liye
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please select purpose";
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 8,),
+
+                        // buildTextField(
+                        //   " 📝Purpose*",
+                        //   guestPurposeController,
+                        //   required: true,
+                        // ),
+                        buildTextField(" 🚗Vehicle No.", guestVichleController),
+
+                        buildTextField(" 🏷️Other", otherController),
+
+                        buildTextField(" 💬Comment", commentController),
+
+                        const SizedBox(height: 20),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xff1cae81), // Red
+                                    Color(0xff1cae81), // Green
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors
+                                      .transparent, // Keep transparent for gradient
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                                onPressed: () => pickImage(true),
+                                icon: Icon(
+                                  visitorPhoto != null
+                                      ? Icons.check_circle
+                                      : Icons.photo_camera,
+                                  color: Colors.white,
+                                ),
+                                label: const Text(
+                                  "Visitor Photo",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
-                    ],
+
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xff1cae81), // Red
+                                    Color(0xff1cae81), // Green
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors
+                                      .transparent, // for gradient visibility
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                                onPressed: () => pickImage(false),
+                                icon: Icon(
+                                  idProofPhoto != null
+                                      ? Icons.check_circle
+                                      : Icons.badge,
+                                  color: Colors.white,
+                                ),
+                                label: const Text(
+                                  "ID Proof",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 30),
+                        isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : SizedBox(
+                                width: double.infinity,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xff1cae81), // Red
+                                        Color(0xff1cae81), // Green
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.all(18),
+                                      backgroundColor: Colors
+                                          .transparent, // transparent for gradient
+                                      shadowColor: Colors.transparent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    onPressed: submitForm,
+                                    child: const Text(
+                                      "🚀 Submit Request",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+        ),
+        bottomNavigationBar: _customBottomNavBar(1),
+        //  BottomNavigationBar(
+        //   type: BottomNavigationBarType.fixed,
+        //   currentIndex: 1,
+        //     selectedItemColor: Colors.grey,
+        //    unselectedItemColor: Colors.black,
+        //    backgroundColor: Color(0xffffffff),
+        //   items: const [
+        //     BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        //     BottomNavigationBarItem(icon: Icon(Icons.swipe_up), label: 'Request'),
+        //     BottomNavigationBarItem(
+        //         icon: Icon(Icons.watch_later_outlined), label: 'Alerts'),
+        //     BottomNavigationBarItem(
+        //         icon: Icon(Icons.history), label: 'History'),
+        //   ],
+        //   onTap: (index) {
+        //     if (index == 0) {
+        //       Navigator.pushReplacement(
+        //           context, MaterialPageRoute(builder: (context) => Homepage()));
+        //     }
+        //     if (index == 1) {
+        //       Navigator.pushReplacement(context,
+        //           MaterialPageRoute(builder: (context) =>AppVisitRequestPage(visitors: userdata) ));
+        //     }
+        //     if (index == 2) {
+        //       Navigator.push(context,
+        //           MaterialPageRoute(builder: (context) => alertsdashboard()));
+        //     }
+        //     if (index == 3) {
+        //       Navigator.push(context,
+        //           MaterialPageRoute(builder: (context) => historypage()));
+        //     }
+        //   },
+        // ),
       ),
-      bottomNavigationBar: _customBottomNavBar(1),
-      //  BottomNavigationBar(
-      //   type: BottomNavigationBarType.fixed,
-      //   currentIndex: 1,
-      //     selectedItemColor: Colors.grey,
-      //    unselectedItemColor: Colors.black,
-      //    backgroundColor: Color(0xffffffff),
-      //   items: const [
-      //     BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-      //     BottomNavigationBarItem(icon: Icon(Icons.swipe_up), label: 'Request'),
-      //     BottomNavigationBarItem(
-      //         icon: Icon(Icons.watch_later_outlined), label: 'Alerts'),
-      //     BottomNavigationBarItem(
-      //         icon: Icon(Icons.history), label: 'History'),
-      //   ],
-      //   onTap: (index) {
-      //     if (index == 0) {
-      //       Navigator.pushReplacement(
-      //           context, MaterialPageRoute(builder: (context) => Homepage()));
-      //     }
-      //     if (index == 1) {
-      //       Navigator.pushReplacement(context,
-      //           MaterialPageRoute(builder: (context) =>AppVisitRequestPage(visitors: userdata) ));
-      //     }
-      //     if (index == 2) {
-      //       Navigator.push(context,
-      //           MaterialPageRoute(builder: (context) => alertsdashboard()));
-      //     }
-      //     if (index == 3) {
-      //       Navigator.push(context,
-      //           MaterialPageRoute(builder: (context) => historypage()));
-      //     }
-      //   },
-      // ),
     );
   }
 
@@ -874,24 +904,24 @@ String? selectedPurpose;
           return GestureDetector(
             onTap: () {
               if (idx == 0) {
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => Homepage()),
                 );
               } else if (idx == 1) {
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => AppVisitRequestPage(visitors: userdata),
                   ),
                 );
               } else if (idx == 2) {
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => alertsdashboard()),
                 );
               } else if (idx == 3) {
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => historypage()),
                 );

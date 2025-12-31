@@ -38,6 +38,8 @@ dependencies:
   flutter_foreground_task: ^9.1.0
   url_launcher: ^6.3.2
   googleapis_auth: ^2.0.0
+  local_auth: ^3.0.0
+ 
  
   
  
@@ -55,6 +57,7 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/images/logo.png"
+
 
 
 

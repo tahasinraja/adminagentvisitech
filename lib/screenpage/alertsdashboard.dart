@@ -7,8 +7,8 @@ import 'package:adminvisitorapp/screenpage/imageview.dart';
 import 'package:adminvisitorapp/screenpage/logoutclass.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 //import 'package:url_launcher/url_launcher.dart';
-
 
 class alertsdashboard extends StatefulWidget {
   const alertsdashboard({super.key});
@@ -18,59 +18,51 @@ class alertsdashboard extends StatefulWidget {
 }
 
 class _alertsdashboardState extends State<alertsdashboard>
-
     with SingleTickerProviderStateMixin {
-String formatNumber(String number) {
-  number = number.trim();
-  if (number.startsWith("+")) return number;
-  return "+91$number";
-}
-
-
-      //twillo
-Future<void> startTwilioCall(
-  String visitorNumber,
-  String hostNumber,
-) async {
-  final url = Uri.parse(
-    "https://visitechservice-6578.twil.io/call",
-  );
-
-  try {
-    final response = await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: {
-        "visitor": visitorNumber,
-        "host": hostNumber,
-      },
-      
-    );
-ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(content: Text("📞 Calling visitor...")),
-);
-
-    print("📞 Twilio Status: ${response.statusCode}");
-    print("📞 Twilio Response: ${response.body}");
-  } catch (e) {
-    print("❌ Twilio Call Error: $e");
+  String formatNumber(String number) {
+    number = number.trim();
+    if (number.startsWith("+")) return number;
+    return "+91$number";
   }
-}
 
+  //twillo
+  // Future<void> startTwilioCall(
+  //   String visitorNumber,
+  //   String hostNumber,
+  // ) async {
+  //   final url = Uri.parse(
+  //     "https://visitechservice-6578.twil.io/call",
+  //   );
 
+  //   try {
+  //     final response = await http.post(
+  //       url,
+  //       headers: {
+  //         "Content-Type": "application/x-www-form-urlencoded",
+  //       },
+  //       body: {
+  //         "visitor": visitorNumber,
+  //         "host": hostNumber,
+  //       },
 
-// callnumber(String phone) async {
-//   if (phone.trim().isEmpty) return;
+  //     );
+  // ScaffoldMessenger.of(context).showSnackBar(
+  //   SnackBar(content: Text("📞 Calling visitor...")),
+  // );
 
-//   final uri = Uri.parse("tel:$phone");
-//   await launchUrl(uri);
-// }
+  //     print("📞 Twilio Status: ${response.statusCode}");
+  //     print("📞 Twilio Response: ${response.body}");
+  //   } catch (e) {
+  //     print("❌ Twilio Call Error: $e");
+  //   }
+  // }
 
+  callnumber(String phone) async {
+    if (phone.trim().isEmpty) return;
 
-
-
+    final uri = Uri.parse("tel:$phone");
+    await launchUrl(uri);
+  }
 
   //  Uri dialnumber = Uri(scheme: 'tel', path: '100');
   // callnumber() async {
@@ -131,12 +123,10 @@ ScaffoldMessenger.of(context).showSnackBar(
           rejected = allHistory
               .where((item) => item['mem_status']?.toLowerCase() == "rejected")
               .toList();
-          waiting = allHistory
-              .where((item) {
-                final status = item['mem_status']?.toLowerCase() ?? "";
-                return status == "waiting" || status == "pending";
-              })
-              .toList();
+          waiting = allHistory.where((item) {
+            final status = item['mem_status']?.toLowerCase() ?? "";
+            return status == "waiting" || status == "pending";
+          }).toList();
 
           isLoading = false;
         });
@@ -150,21 +140,20 @@ ScaffoldMessenger.of(context).showSnackBar(
     }
   }
 
- List<dynamic> applyDateFilter(List<dynamic> data) {
-  DateTime now = DateTime.now();
-  return data.where((item) {
-    String? dateStr = item['mem_feeddatetime'];
-    if (dateStr == null || dateStr.isEmpty) return false;
+  List<dynamic> applyDateFilter(List<dynamic> data) {
+    DateTime now = DateTime.now();
+    return data.where((item) {
+      String? dateStr = item['mem_feeddatetime'];
+      if (dateStr == null || dateStr.isEmpty) return false;
 
-    DateTime itemDate = DateTime.tryParse(dateStr) ?? DateTime(2000);
+      DateTime itemDate = DateTime.tryParse(dateStr) ?? DateTime(2000);
 
-    // ✅ Only today ke records
-    return itemDate.year == now.year &&
-        itemDate.month == now.month &&
-        itemDate.day == now.day;
-  }).toList();
-}
-
+      // ✅ Only today ke records
+      return itemDate.year == now.year &&
+          itemDate.month == now.month &&
+          itemDate.day == now.day;
+    }).toList();
+  }
 
   String getPhotoUrl(String? photo) {
     if (photo != null && photo.isNotEmpty) {
@@ -180,152 +169,162 @@ ScaffoldMessenger.of(context).showSnackBar(
     }
     return "assets/images/default.jpg";
   }
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-     appBar: AppBar(
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
         backgroundColor: Color(0xff1cae81),
         title: Row(
-          
           children: [
-            Image.asset(  'assets/images/logo.png', height: 35),
+            Image.asset('assets/images/logo.png', height: 35),
             SizedBox(width: 10),
             Spacer(),
-            Text('VISITECH ', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)),
+            Text(
+              'VISITECH ',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             Spacer(),
             IconButton(
               icon: Icon(Icons.logout, color: Colors.white),
               onPressed: () => Logout.signout(context),
-            )
-          ]
-        ) 
-      
-      ),
-    body: RefreshIndicator(
-      onRefresh: () async {
-        await fetchHistoryData();
-      },
-      child: Column(
-        children: [
-          // 🔹 Modern pill-style tab toggle
-          Container(
-            height: 53,
-            margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-            decoration: BoxDecoration(
-              color: Color(0xff1cae81),
-              borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildTabToggle("Approved", 0, Colors.black),
-                _buildTabToggle("Rejected", 1, Colors.red),
-                _buildTabToggle("Waiting", 2, Colors.orange),
-              ],
-            ),
-          ),
-
-          Expanded(
-            child: isLoading
-                ? Center(child: CircularProgressIndicator())
-                : TabBarView(
-                    controller: _tabController,
-                    children: [
-                      buildList(approved, Colors.green),
-                      buildList(rejected, Colors.red),
-                      buildList(waiting, Colors.orange),
-                    ],
-                  ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-    bottomNavigationBar:_customBottomNavBar(2),
-  );
-}
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await fetchHistoryData();
+        },
+        child: Column(
+          children: [
+            // 🔹 Modern pill-style tab toggle
+            Container(
+              height: 53,
+              margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+              decoration: BoxDecoration(
+                color: Color(0xff1cae81),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildTabToggle("Approved", 0, Colors.black),
+                  _buildTabToggle("Rejected", 1, Colors.red),
+                  _buildTabToggle("Waiting", 2, Colors.orange),
+                ],
+              ),
+            ),
 
-Widget buildList(List<dynamic> data, Color color) {
-  // ✅ Always apply Today filter here
-  List<dynamic> filteredData = applyDateFilter(data);
-
-  if (filteredData.isEmpty) {
-    return Center(child: Text("No records found for Today"));
+            Expanded(
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        buildList(approved, Colors.green),
+                        buildList(rejected, Colors.red),
+                        buildList(waiting, Colors.orange),
+                      ],
+                    ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: _customBottomNavBar(2),
+    );
   }
 
-  return ListView.builder(
-    padding: EdgeInsets.all(12),
-    itemCount: filteredData.length,
-    itemBuilder: (context, index) {
-      final item = filteredData[index];
-      return Card(
-        elevation: 4,
-        margin: EdgeInsets.symmetric(vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(getPhotoUrl(item['visitorphoto'])),
+  Widget buildList(List<dynamic> data, Color color) {
+    // ✅ Always apply Today filter here
+    List<dynamic> filteredData = applyDateFilter(data);
+
+    if (filteredData.isEmpty) {
+      return Center(child: Text("No records found for Today"));
+    }
+
+    return ListView.builder(
+      padding: EdgeInsets.all(12),
+      itemCount: filteredData.length,
+      itemBuilder: (context, index) {
+        final item = filteredData[index];
+        return Card(
+          elevation: 4,
+          margin: EdgeInsets.symmetric(vertical: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          title: Row(
-            children: [
-              Text(item['guest_name'] ?? "Unknown"),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(getPhotoUrl(item['visitorphoto'])),
+            ),
+            title: Row(
+              children: [
+                Text(item['guest_name'] ?? "Unknown"),
 
-              Spacer(),
- IconButton(
-  icon: Icon(Icons.phone, color: Colors.green),
-  onPressed: () {
-    final visitor = item['guest_mobile'];
-    final host = item['phone'];
+                Spacer(),
 
-    if (visitor == null || host == null) return;
+                //  IconButton(
+                //   icon: Icon(Icons.phone, color: Colors.green),
+                //   onPressed: () {
+                //     final visitor = item['guest_mobile'];
+                //     final host = item['phone'];
 
-    startTwilioCall(
-      formatNumber(visitor.toString()), // visitor
-      formatNumber(host.toString()),    // host (dynamic ✅)
-    );
-  },
-),
+                //     if (visitor == null || host == null) return;
 
-
-
-// IconButton(
-//   onPressed: item['phone'] == null || item['phone'].toString().isEmpty
-//       ? null
-//       : () => callnumber(item['phone'].toString()),
-//   icon: Icon(Icons.phone),
-//   color: Colors.green,
-// ),
-
-
-            ],
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Phone: ${item['guest_mobile'] ?? '-'}"),
-              Text("Status: ${item['mem_status'] ?? '-'}",
-                  style: TextStyle(color: color, fontWeight: FontWeight.bold)),
-              Text("Date: ${item['mem_feeddatetime'] ?? '-'}"),
-              Text('Host No. : ${item['phone'] ?? '-'}'),
-            ],
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PhotoViewPage(
-                  imageUrl: item['idproofphoto'] ?? "",
+                //     // startTwilioCall(
+                //     //   formatNumber(visitor.toString()), // visitor
+                //     //   formatNumber(host.toString()),    // host (dynamic ✅)
+                //     // );
+                //   },
+                // ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.green, width: 1.5),
+                  ),  
+                  
+                  child: IconButton(
+                    onPressed:
+                        item['phone'] == null || item['phone'].toString().isEmpty
+                        ? null
+                        : () => callnumber(item['phone'].toString()),
+                    icon: Icon(Icons.phone),
+                    color: Colors.green,
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-      );
-    },
-  );
-}
-
+              ],
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Phone: ${item['guest_mobile'] ?? '-'}"),
+                Text(
+                  "Status: ${item['mem_status'] ?? '-'}",
+                  style: TextStyle(color: color, fontWeight: FontWeight.bold),
+                ),
+                Text("Date: ${item['mem_feeddatetime'] ?? '-'}"),
+                //Text('Host No. : ${item['phone'] ?? '-'}'),
+              ],
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      PhotoViewPage(imageUrl: item['idproofphoto'] ?? ""),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 
   Widget _buildTabToggle(String text, int index, Color color) {
     bool isSelected = _tabController.index == index;
@@ -363,7 +362,7 @@ Widget buildList(List<dynamic> data, Color color) {
     );
   }
 
-    Widget _customBottomNavBar(int currentIndex) {
+  Widget _customBottomNavBar(int currentIndex) {
     List<Map<String, dynamic>> navItems = [
       {"icon": Icons.home, "label": "Home"},
       {"icon": Icons.swipe_up, "label": "Request"},
@@ -377,7 +376,13 @@ Widget buildList(List<dynamic> data, Color color) {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -389,13 +394,28 @@ Widget buildList(List<dynamic> data, Color color) {
           return GestureDetector(
             onTap: () {
               if (idx == 0) {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Homepage()));
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => Homepage()),
+                );
               } else if (idx == 1) {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AppVisitRequestPage(visitors: userdata??[])));
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        AppVisitRequestPage(visitors: userdata ?? []),
+                  ),
+                );
               } else if (idx == 2) {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => alertsdashboard()));
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => alertsdashboard()),
+                );
               } else if (idx == 3) {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => historypage()));
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => historypage()),
+                );
               }
             },
             child: AnimatedContainer(
@@ -403,18 +423,35 @@ Widget buildList(List<dynamic> data, Color color) {
               padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               decoration: isSelected
                   ? BoxDecoration(
-                      gradient: LinearGradient(colors: [Color(0xff1cae81), Color(0xff1cae81)]),
+                      gradient: LinearGradient(
+                        colors: [Color(0xff1cae81), Color(0xff1cae81)],
+                      ),
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3))],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     )
                   : BoxDecoration(),
               child: Row(
                 children: [
-                  Icon(item['icon'], color: isSelected ? Colors.white : Colors.black54),
+                  Icon(
+                    item['icon'],
+                    color: isSelected ? Colors.white : Colors.black54,
+                  ),
                   if (isSelected) ...[
                     SizedBox(width: 6),
-                    Text(item['label'], style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ]
+                    Text(
+                      item['label'],
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -423,4 +460,4 @@ Widget buildList(List<dynamic> data, Color color) {
       ),
     );
   }
-  }
+}

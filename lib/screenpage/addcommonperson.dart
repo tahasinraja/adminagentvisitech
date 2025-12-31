@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:adminvisitorapp/screenpage/logoutclass.dart';
@@ -6,17 +7,20 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 
-class AddDataPage extends StatefulWidget {
-  const AddDataPage({super.key});
+class addcommonpersonpage extends StatefulWidget {
+  const addcommonpersonpage({super.key});
 
   @override
-  State<AddDataPage> createState() => _AddDataPageState();
+  State<addcommonpersonpage> createState() => _addcommonpersonpageState();
 }
 
-class _AddDataPageState extends State<AddDataPage> {
+class _addcommonpersonpageState extends State<addcommonpersonpage> {
+
+
+
   logout Logout = logout();
   final _formKey = GlobalKey<FormState>();
-  final String url1 = 'https://ancoinnovation.com/visitor/flat_mem_reg.php';
+  final String url1 = 'https://ancoinnovation.com/visitor/common_people_add.php';
 
   final nameController = TextEditingController();
   final regidController = TextEditingController();
@@ -29,15 +33,61 @@ class _AddDataPageState extends State<AddDataPage> {
   File? _selectedImage;
   bool isLoading = false;
 
-  Future<void> pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(
-        source: ImageSource.camera, imageQuality: 80);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
-    }
+Future<void> pickImage() async {
+  print("📸 Pick image option opened");
+
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.green),
+              title: const Text("Camera"),
+              onTap: () {
+                Navigator.pop(context);
+                _getImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Colors.blue),
+              title: const Text("Gallery"),
+              onTap: () {
+                Navigator.pop(context);
+                _getImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+Future<void> _getImage(ImageSource source) async {
+  print("📂 Image source selected: $source");
+
+  final pickedFile = await ImagePicker().pickImage(
+    source: source,
+    imageQuality: 80,
+  );
+
+  if (pickedFile == null) {
+    print("❌ Image selection cancelled");
+    return;
   }
+
+  print("✅ Image path: ${pickedFile.path}");
+
+  setState(() {
+    _selectedImage = File(pickedFile.path);
+  });
+}
+
 
   Future<void> addVisitor() async {
     if (!_formKey.currentState!.validate()) return;
@@ -52,12 +102,11 @@ class _AddDataPageState extends State<AddDataPage> {
     try {
       var request = http.MultipartRequest('POST', Uri.parse(url1));
       request.fields['name'] = nameController.text;
-      request.fields['regid'] = regidController.text;
+  
       request.fields['email'] = emailController.text;
       request.fields['phone'] = phoneController.text;
-      request.fields['flat'] = flatController.text;
-      request.fields['room'] = roomController.text;
-      request.fields['pass']=passwordcontroller.text;
+      request.fields['flat_address'] = flatController.text;
+  
 
       request.files.add(await http.MultipartFile.fromPath(
           'image', _selectedImage!.path));
@@ -66,14 +115,16 @@ class _AddDataPageState extends State<AddDataPage> {
       var response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
+       
         var data = jsonDecode(response.body);
-        print("Response: $data");
-        print('Response.body');
-         print("📩 Status Code: ${response.statusCode}");
-  print("📦 Raw Response Body: ${response.body}");
+   debugPrint("✅ STATUS CODE: ${response.statusCode}");
+  debugPrint("📦 RAW RESPONSE BODY:");
+  debugPrint(response.body, wrapWidth: 1024);
 
+  debugPrint("📊 DECODED DATA:");
+  debugPrint(data.toString(), wrapWidth: 1024);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Visitor added successfully")),
+          const SnackBar(content: Text("Common person added successfully")),
         );
         Navigator.pop(context, true);
       } else {
@@ -117,6 +168,7 @@ class _AddDataPageState extends State<AddDataPage> {
       ),
     );
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -158,6 +210,10 @@ class _AddDataPageState extends State<AddDataPage> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    Text('Add Common Person Details:',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w400)),
+                    const SizedBox(height: 20),
                     // Image Picker
                     GestureDetector(
                       onTap: pickImage,
@@ -188,10 +244,10 @@ class _AddDataPageState extends State<AddDataPage> {
                     
                     buildTextField("Email", Icons.email, emailController),
                     buildTextField("Phone", Icons.phone, phoneController,maxlenght: 10),
-                    buildTextField("Flat", Icons.apartment, flatController),
-                    buildTextField( "Room", Icons.meeting_room, roomController),
-                       buildTextField("RegId", Icons.badge, regidController),
-                         buildTextField("pass", Icons.password, passwordcontroller),
+                    buildTextField("Address", Icons.apartment, flatController),
+                   // buildTextField( "Room", Icons.meeting_room, roomController),
+                     //  buildTextField("RegId", Icons.badge, regidController),
+                      //   buildTextField("pass", Icons.password, passwordcontroller),
 
                     const SizedBox(height: 20),
 
